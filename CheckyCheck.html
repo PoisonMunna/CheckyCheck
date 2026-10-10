@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checky Check</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --theme-color: #38BDF8; /* Default to Sky */
+            --bg-color: #ecf0f4;
+            --cell-size: clamp(20px, 4vw, 40px); /* Responsive cell sizing */
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 100% 150%, #ffffff 24%, white 24%, white 28%, transparent 28%, transparent 36%, white 36%, white 40%, transparent 40%, transparent),
+                radial-gradient(circle at 0    150%, #ffffff 24%, white 24%, white 28%, transparent 28%, transparent 36%, white 36%, white 40%, transparent 40%, transparent),
+                radial-gradient(circle at 50%  100%, #ffffff 10%, white 10%, white 23%, transparent 23%, transparent 30%, white 30%, white 43%, transparent 43%, transparent),
+                radial-gradient(circle at 100% 50%, #ffffff 5%, white 5%, white 15%, transparent 15%, transparent 20%, white 20%, white 29%, transparent 29%, transparent),
+                radial-gradient(circle at 0    50%, #ffffff 5%, white 5%, white 15%, transparent 15%, transparent 20%, white 20%, white 29%, transparent 29%, transparent);
+            background-size: 100px 100px;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: var(--theme-color);
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.1), -1px -1px 0px rgba(255,255,255,0.8);
+            transition: color 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Glossy Input Elements */
+        .glossy-input {
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-weight: 700;
+            color: #555;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,240,240,0.9) 100%);
+            box-shadow: 
+                inset 0 4px 6px rgba(255, 255, 255, 0.8),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.05),
+                0 4px 10px rgba(0,0,0,0.1);
+            outline: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .glossy-input:focus {
+            transform: scale(1.05);
+            box-shadow: 
+                inset 0 4px 6px rgba(255, 255, 255, 0.8),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.05),
+                0 8px 15px rgba(0,0,0,0.15),
+                0 0 0 4px var(--theme-color);
+        }
+
+        /* Glossy Button */
+        .glossy-btn {
+            background-color: var(--theme-color);
+            color: white;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%);
+            box-shadow: 
+                inset 0 4px 6px rgba(255, 255, 255, 0.6),
+                inset 0 -4px 6px rgba(0, 0, 0, 0.2),
+                0 6px 12px rgba(0,0,0,0.2);
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glossy-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .glossy-btn:active {
+            transform: translateY(4px) scale(0.95);
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.2),
+                0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Grid Container */
+        .grid-wrapper {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 
+                inset 0 0 20px rgba(255,255,255,0.8),
+                0 10px 30px rgba(0,0,0,0.05);
+            max-width: 95vw;
+            overflow: auto; /* Allow scrolling if grid is huge */
+            border: 4px solid white;
+        }
+
+        .calendar-grid {
+            display: grid;
+            gap: clamp(4px, 1vw, 8px);
+            /* Columns and Rows set dynamically via JS inline styles */
+        }
+
+        /* The Box Cell */
+        .box-cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background-color: #e5e7eb; /* Unchecked state (gray) */
+            border-radius: 30%; /* Squircle shape */
+            cursor: pointer;
+            position: relative;
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 100%);
+            box-shadow: 
+                inset 2px 2px 4px rgba(255,255,255,1),
+                inset -2px -2px 4px rgba(0,0,0,0.1),
+                2px 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Checked Box State */
+        .box-cell.checked {
+            background-color: var(--theme-color);
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 
+                inset 2px 2px 5px rgba(255,255,255,0.6),
+                inset -2px -2px 5px rgba(0,0,0,0.2),
+                0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .box-cell:active {
+            transform: scale(0.8) !important;
+        }
+
+        /* Theme Selector Swatches */
+        .swatch-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 100px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .swatch {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.2s;
+            position: relative;
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 100%);
+        }
+
+        .swatch:hover {
+            transform: scale(1.2);
+        }
+
+        .swatch.active {
+            transform: scale(1.3);
+            border-color: #333;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        .swatch.active::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Add a nice bouncy entrance animation to the grid */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        .calendar-grid .box-cell {
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards;
+        }
+
+    </style>
+</head>
+<body class="py-10 text-gray-700">
+
+    <main class="w-full max-w-5xl mx-auto px-4 flex flex-col items-center">
+        
+        <h1 class="text-5xl md:text-6xl text-center mb-6 tracking-wide">Checky Check !</h1>
+        <p class="text-center font-bold text-gray-500 mb-8 max-w-md">Pick your size, choose a flavor, and check the box !</p>
+
+        <!-- Controls for Rows/Cols -->
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-8 bg-white/50 backdrop-blur-md p-6 rounded-[2rem] shadow-xl border-4 border-white">
+            <div class="flex flex-col items-center">
+                <label for="rows-input" class="text-sm font-bold text-gray-500 mb-1 uppercase tracking-wider">Rows</label>
+                <input type="number" id="rows-input" value="7" min="1" max="50" class="glossy-input w-24 text-center text-xl">
+            </div>
+            
+            <span class="text-3xl font-black text-gray-400 mt-5">×</span>
+
+            <div class="flex flex-col items-center">
+                <label for="cols-input" class="text-sm font-bold text-gray-500 mb-1 uppercase tracking-wider">Columns</label>
+                <input type="number" id="cols-input" value="10" min="1" max="100" class="glossy-input w-24 text-center text-xl">
+            </div>
+
+            <button id="generate-btn" class="glossy-btn mt-5 ml-4">Make Grid! ✨</button>
+        </div>
+
+        <!-- Theme Colors (10 Variants) -->
+        <div class="swatch-container" id="theme-selector">
+            <!-- Swatches will be generated by JS -->
+        </div>
+
+        <!-- The Main Grid Container -->
+        <div class="grid-wrapper">
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- Cells generated here -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // 10 Fun "Childish" Colors
+        const themes = [
+            { name: 'Sky', color: '#38BDF8' },
+            { name: 'Bubblegum', color: '#FF69B4' },
+            { name: 'Mint', color: '#4ADE80' },
+            { name: 'Peacock Blue', color: '#00A4B4' },
+            { name: 'Sunshine', color: '#FCD34D' },
+            { name: 'Lavender', color: '#A78BFA' },
+            { name: 'Orange Crush', color: '#FB923C' },
+            { name: 'Apple Red', color: '#F87171' },
+            { name: 'Grape', color: '#C084FC' },
+            { name: 'Slime Green', color: '#84CC16' },
+            { name: 'Cotton Candy', color: '#67E8F9' }
+        ];
+
+        // DOM Elements
+        const gridContainer = document.getElementById('calendar-grid');
+        const rowsInput = document.getElementById('rows-input');
+        const colsInput = document.getElementById('cols-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const themeSelector = document.getElementById('theme-selector');
+
+        // Initialize App
+        function init() {
+            buildThemeSelector();
+            generateGrid(); // Generate initial default grid
+            
+            // Event Listeners
+            generateBtn.addEventListener('click', () => {
+                // Add a little pop effect to the button
+                generateGrid();
+            });
+
+            // Delegate click events for grid cells
+            gridContainer.addEventListener('click', (e) => {
+                if(e.target.classList.contains('box-cell')) {
+                    toggleCell(e.target);
+                }
+            });
+        }
+
+        // Build the Color Swatches
+        function buildThemeSelector() {
+            themes.forEach((theme, index) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'swatch';
+                swatch.style.backgroundColor = theme.color;
+                swatch.title = theme.name;
+                
+                if (index === 0) swatch.classList.add('active'); // First is default
+
+                swatch.addEventListener('click', () => {
+                    // Remove active from all
+                    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+                    // Set active to clicked
+                    swatch.classList.add('active');
+                    // Update CSS variable for the theme color
+                    document.documentElement.style.setProperty('--theme-color', theme.color);
+                });
+
+                themeSelector.appendChild(swatch);
+            });
+        }
+
+        // Generate the Grid based on inputs
+        function generateGrid() {
+            // Sanitize inputs
+            let rows = parseInt(rowsInput.value) || 7;
+            let cols = parseInt(colsInput.value) || 10;
+
+            // Cap values to prevent browser freezing
+            if(rows > 50) { rows = 50; rowsInput.value = 50; }
+            if(cols > 100) { cols = 100; colsInput.value = 100; }
+            if(rows < 1) { rows = 1; rowsInput.value = 1; }
+            if(cols < 1) { cols = 1; colsInput.value = 1; }
+
+            // Set grid dimensions via CSS variables/inline styles
+            gridContainer.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+            gridContainer.style.gridTemplateRows = `repeat(${rows}, var(--cell-size))`;
+
+            // Clear previous grid
+            gridContainer.innerHTML = '';
+
+            const totalCells = rows * cols;
+            
+            // Create cells with a staggered animation delay
+            for (let i = 0; i < totalCells; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'box-cell';
+                
+                // Add staggering effect based on column position (like github commit chart)
+                const colIndex = Math.floor(i / rows); 
+                const animationDelay = colIndex * 0.02; // 20ms per column
+                cell.style.animationDelay = `${animationDelay}s`;
+                
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        // Toggle Cell state
+        function toggleCell(cellElement) {
+            cellElement.classList.toggle('checked');
+            
+            // Optional: Play a tiny sound effect here if desired (omitted to keep it simple and within constraints, but visually it pops)
+        }
+
+        // Boot up
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
