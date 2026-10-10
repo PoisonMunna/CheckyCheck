@@ -35,7 +35,7 @@ Designed with a bouncy, glossy, and "childish" aesthetic, it's perfect for track
 *   **Google Fonts:** Uses *Fredoka One* (for headings) and *Nunito* (for body text).
 
 ## 🤝 Contributing
-# ![PoisonMunna](https://github.com/PoisonMunna)
+# [PoisonMunna](https://github.com/PoisonMunna)
 This is a fun, open-source toy project! Feel free to fork the repository, tweak the CSS animations, add new color themes, or build in features like "export to image" or "save to local storage." 
 
 Happy popping! 🎈
