@@ -144,6 +144,21 @@
                 0 5px 15px rgba(0,0,0,0.2);
         }
 
+        /* Inactive Box State */
+        .box-cell.inactive {
+            background-color: #9ca3af;
+            background-image: none;
+            box-shadow: inset 2px 2px 6px rgba(0,0,0,0.3);
+            opacity: 0.5;
+            transform: scale(0.9);
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+
+        .box-cell.inactive:active {
+            transform: scale(0.9) !important;
+        }
+
         .box-cell:active {
             transform: scale(0.8) !important;
         }
@@ -286,6 +301,15 @@
                     toggleCell(e.target);
                 }
             });
+
+            // Delegate double click events for inactivating cells
+            gridContainer.addEventListener('dblclick', (e) => {
+                if(e.target.classList.contains('box-cell')) {
+                    toggleInactive(e.target);
+                    // Prevent accidental text selection during fast double clicks
+                    window.getSelection().removeAllRanges();
+                }
+            });
         }
 
         // Build the Color Swatches
@@ -311,6 +335,25 @@
             });
         }
 
+        // Toggle Cell state (single click)
+        function toggleCell(cellElement) {
+            // Ignore single clicks if the cell is inactive
+            if (cellElement.classList.contains('inactive')) return; 
+            
+            cellElement.classList.toggle('checked');
+        }
+
+        // Toggle Inactive state (double click)
+        function toggleInactive(cellElement) {
+            cellElement.classList.toggle('inactive');
+            
+            // Remove checked state if it becomes inactive
+            if (cellElement.classList.contains('inactive')) {
+                cellElement.classList.remove('checked');
+            }
+        }
+
+        
         // Generate the Grid based on inputs
         function generateGrid() {
             // Sanitize inputs
