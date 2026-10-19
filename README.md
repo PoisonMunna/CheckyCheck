@@ -1,4 +1,4 @@
-# ☑️ Checky Check
+# ☑️ Checky Check 
 
 Welcome to the **Checky Check**! This is a simple, playful, and interactive web application that lets you generate custom grid layouts similar to the GitHub contribution calendar. 
 
